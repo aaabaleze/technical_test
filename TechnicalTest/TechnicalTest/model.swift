@@ -22,11 +22,9 @@ class ImageAPI {
             request.httpMethod = "GET"
             do {
                 let (data, response) = try await URLSession.shared.data(for: request)
-                print(response)
                 let str = String(data: data, encoding: .utf8)
                 let decodedAnswer = try decoder.decode(ResponseSearchImages.self, from: data)
                 self.imagesFound.append(decodedAnswer)
-                print(self.imagesFound)
                 //print(response)
             } catch {
                 print(error)
@@ -51,8 +49,6 @@ struct Hits: Codable {
 }
 
 class GetImage: UIImageView {
-    //var viewController = ImagesViewController()
-    //weak var collectionView = ImagesViewController.collectionView
     let imageCache = NSCache<AnyObject, AnyObject>()
     
     func loadImage(url: URL, indexPath: Int) async throws  {
@@ -61,7 +57,6 @@ class GetImage: UIImageView {
         spinner.startAnimating()
         
         if let imageFromCache = imageCache.object(forKey: url.absoluteString as AnyObject) as? UIImage {
-            print("image cache for indexpath: \(indexPath): \(url.absoluteString)")
             self.image = imageFromCache
             return
         }
@@ -69,18 +64,14 @@ class GetImage: UIImageView {
         do {
             let request = URLRequest(url: url,timeoutInterval: Double.infinity)
             let (data, response) = try await URLSession.shared.data(for: request)
-            print(response)
             guard let newImage = UIImage(data: data) else {
                 print("error")
                 return
             }
             self.imageCache.setObject(newImage, forKey: url.absoluteString as AnyObject)
             DispatchQueue.main.async {
-                print("image for indexpath: \(indexPath): \(url.absoluteString)")
                 self.image = newImage
-                //self.viewController?.collectionView.reloadItems(at: [indexPath])
             }
-            
         } catch {
             print(error)
         }

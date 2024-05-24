@@ -14,6 +14,7 @@
 		2FD16FB52BFF15B1006B0098 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 2FD16FB42BFF15B1006B0098 /* Base */; };
 		2FD16FBD2BFF1659006B0098 /* model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FD16FBC2BFF1659006B0098 /* model.swift */; };
 		2FD16FC12BFF2C4B006B0098 /* ImagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FD16FC02BFF2C4A006B0098 /* ImagesViewController.swift */; };
+		2FD73AF42BFFD82400A60E91 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FD73AF32BFFD82400A60E91 /* DetailViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		2FD16FB62BFF15B1006B0098 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2FD16FBC2BFF1659006B0098 /* model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = model.swift; sourceTree = "<group>"; };
 		2FD16FC02BFF2C4A006B0098 /* ImagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesViewController.swift; sourceTree = "<group>"; };
+		2FD73AF32BFFD82400A60E91 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 				2FD16FAA2BFF15AF006B0098 /* SceneDelegate.swift */,
 				2FD16FAC2BFF15AF006B0098 /* ViewController.swift */,
 				2FD16FC02BFF2C4A006B0098 /* ImagesViewController.swift */,
+				2FD73AF32BFFD82400A60E91 /* DetailViewController.swift */,
 				2FD16FB12BFF15B1006B0098 /* Assets.xcassets */,
 				2FD16FB32BFF15B1006B0098 /* LaunchScreen.storyboard */,
 				2FD16FB62BFF15B1006B0098 /* Info.plist */,
@@ -143,6 +146,7 @@
 				2FD16FC12BFF2C4B006B0098 /* ImagesViewController.swift in Sources */,
 				2FD16FAD2BFF15AF006B0098 /* ViewController.swift in Sources */,
 				2FD16FA92BFF15AF006B0098 /* AppDelegate.swift in Sources */,
+				2FD73AF42BFFD82400A60E91 /* DetailViewController.swift in Sources */,
 				2FD16FAB2BFF15AF006B0098 /* SceneDelegate.swift in Sources */,
 				2FD16FBD2BFF1659006B0098 /* model.swift in Sources */,
 			);

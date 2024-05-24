@@ -7,16 +7,16 @@
 
 import UIKit
 
-class ImagesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
+class ImagesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     lazy var collectionView = UICollectionView()
     var imageLoader = GetImage()
     var imagesSearch: [ResponseSearchImages?] = []
+    var imagesForDetailedView: [UIImage] = []
     let flowLayout: UICollectionViewFlowLayout = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 5
         layout.minimumLineSpacing = 5
-        layout.itemSize = CGSize(width: 300, height: 300)
-        layout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        layout.itemSize = CGSize(width: 150, height: 150)
         return layout
     }()
     
@@ -24,22 +24,19 @@ class ImagesViewController: UIViewController, UICollectionViewDelegate, UICollec
         super.viewDidLoad()
         view.backgroundColor = .white
         navigationItem.title = "Images"
+        navigationItem.rightBarButtonItem =  UIBarButtonItem(title: "Detail", style: .done, target: self, action: #selector(goToDetailViewController))
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(customCell.self, forCellWithReuseIdentifier: "Cell")
         collectionView.allowsMultipleSelection = true
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        //imageLoader.collectionView = collectionView
         view.addSubview(collectionView)
         collectionView.isScrollEnabled = true
         setupConstraint()
-        print("count image: \((imagesSearch[0]?.hits.count)!)")
         
         for i in 0...(imagesSearch[0]?.hits.count)!-1 {
-            //print(imagesSearch)
             if let imageURL = (imagesSearch[0]?.hits[i]?.webformatURL) {
-                ("on va télécharger :\(imageURL)")
                 let image = imageURL
                 if let url = URL(string: image) {
                     Task {
@@ -48,9 +45,9 @@ class ImagesViewController: UIViewController, UICollectionViewDelegate, UICollec
                     }
                 }
             }
-            
         }
     }
+    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         1
     }
@@ -65,40 +62,55 @@ class ImagesViewController: UIViewController, UICollectionViewDelegate, UICollec
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let cell = collectionView.cellForItem(at: indexPath)
-        print("selected")
         cell?.layer.borderColor = UIColor.red.cgColor
         cell?.layer.borderWidth = 2.0
+        if let imageURL = (imagesSearch[0]?.hits[indexPath.row]?.webformatURL) {
+            if let imageFromCache = imageLoader.imageCache.object(forKey: imageURL as AnyObject) as? UIImage {
+                self.imagesForDetailedView.append(imageFromCache)
+            }
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         let cell = collectionView.cellForItem(at: indexPath)
-        print("de-selected")
         cell?.layer.borderColor = UIColor.white.cgColor
         cell?.layer.borderWidth = 2.0
+        if let imageURL = imagesSearch[0]?.hits[indexPath.row]?.webformatURL {
+            if let imageFromCache = imageLoader.imageCache.object(forKey: imageURL as AnyObject) as? UIImage {
+                self.imagesForDetailedView.removeAll(where: {$0 == imageFromCache})
+            }
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! customCell
         if let imageURL = (imagesSearch[0]?.hits[indexPath.row]?.webformatURL) {
-            print("imageURL looks like : \(imageURL)")
             let image = imageURL
-            if let url = URL(string: image) {
                 if let imageFromCache = imageLoader.imageCache.object(forKey: image as AnyObject) as? UIImage {
-                    print("je la trouve")
                     imageLoader.image = imageFromCache
-                    print(imageLoader.image)
                     cell.image.image = imageLoader.image
-                    cell.image.contentMode = .scaleAspectFill
+                    cell.image.contentMode = .center
                     cell.image.clipsToBounds = true
                 } else {
-                    print("je ne la trouve aps")
+                    let spinner = createRowLoader()
+                    spinner.startAnimating()
+                    cell.addSubview(spinner)
                 }
-            }
         }
         return cell
     }
     
-    //return CGSize(width: (collectionView.bounds.width - 20) / 3, height: 50)
+    @objc func goToDetailViewController() {
+        if self.imagesForDetailedView.count >= 1 {
+            let viewControllerGame = DetailViewController()
+            viewControllerGame.images = self.imagesForDetailedView
+            navigationController?.pushViewController(viewControllerGame, animated: true)
+        } else {
+            let ac = UIAlertController(title: "No image selected", message: "Please select at least one image", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+            navigationController?.present(ac, animated: true, completion: nil)
+        }
+    }
     
     func setupConstraint() {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -125,31 +137,25 @@ class ImagesViewController: UIViewController, UICollectionViewDelegate, UICollec
             print("Oops!")
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = view.frame.width
+        return CGSize(width: width, height: width)
+    }
 }
 
 class customCell: UICollectionViewCell {
-    var pageTitle = UILabel()
-    var image = UIImageView()
+    var image: UIImageView = UIImageView(frame: CGRect.zero)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        image.contentMode  = .scaleAspectFill
+        image.frame.size = CGSize(width: self.frame.width, height: self.frame.height)
+        image.contentMode  = .center
+        image.clipsToBounds = true
         addSubview(image)
-        setupConstraint()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    func setupConstraint() {
-        image.translatesAutoresizingMaskIntoConstraints = false
-        let viewCellConstraints = [
-            image.topAnchor.constraint(equalTo: contentView.topAnchor),
-            image.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            image.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            image.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            ]
-        NSLayoutConstraint.activate(viewCellConstraints)
     }
 }

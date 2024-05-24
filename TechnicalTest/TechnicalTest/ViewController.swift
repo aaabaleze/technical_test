@@ -62,39 +62,33 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        
-        // get the current text, or use an empty string if that failed
         let currentText = textField.text ?? ""
-
-            // attempt to read the range they are trying to change, or exit if we can't
         guard let stringRange = Range(range, in: currentText) else { return false }
-
-            // add their new text to the existing text
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string).lowercased()
         self.sizedCurrentText = updatedText.replacingOccurrences(of: " ", with: "+")
-        print("current: \(self.sizedCurrentText)")
-
-            // make sure the result is under 100 characters
-            return updatedText.count <= 100
+        return updatedText.count <= 100
     }
     
     @objc func searchButtonPushed() {
-        print("button is hitted with textfield input : \(self.sizedCurrentText)")
         //call for api searched ?
         let calls = ImageAPI()
         let VC = ImagesViewController()
         Task.detached {
             try await prepareCollectionView()
         }
-        // pop up to collection view
         
         func prepareCollectionView() async throws {
             do {
-                //search for the images
                 try await calls.searchImages(search: self.sizedCurrentText)
+                if calls.imagesFound[0].hits.isEmpty {
+                    let ac = UIAlertController(title: "No image found", message: "Please select another wording/sentence", preferredStyle: .alert)
+                    ac.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+                    navigationController?.present(ac, animated: true, completion: nil)
+                    return
+            } else {
                 VC.imagesSearch = calls.imagesFound
                 navigationController?.pushViewController(VC, animated: true)
-                //download images
+            }
             } catch {
                 print(error)
             }
